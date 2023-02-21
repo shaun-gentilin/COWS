@@ -10,7 +10,7 @@ cnt = 0
 #give the user 30 seconds to plug the device in before exiting
 while True:
     #check for a timeout
-    if cnt >= 10:
+    if cnt >= 30:
         print('Did not detect device...')
         exit()
     #check if the available ports have changed
