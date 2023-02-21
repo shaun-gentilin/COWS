@@ -5,3 +5,5 @@ A repository for the code that will be used for all of the sensors and communica
 The folder getAcceleration contains code pulled from the DFRobot website for getting data from the accelerometer.
 
 The file read_serial.py contains code for reading from the serial port on a PC, which is to be used to get data over the bluetooth connection.
+
+The file read_emg.ino is the code that will go on the board to read from EMG sensors.
