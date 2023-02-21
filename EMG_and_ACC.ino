@@ -1,7 +1,3 @@
-/* This file sets up the sampling frequency and data collection runtime for the EMG sensor.
-At this point the program uses an example filter where it simply squares the unfiltered value.
-Actual filter operations and export of data to Bluno beetle will be added in the future */
-
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
 #else 
@@ -9,6 +5,9 @@ Actual filter operations and export of data to Bluno beetle will be added in the
 #endif
 
 #include "EMGFilters.h" 
+#include <DFRobot_LIS.h>
+
+DFRobot_H3LIS200DL_I2C acce;
 
 #define TIMING_DEBUG 1
 #define SensorInputPin1 A0 // input pin number for 1st EMG
@@ -16,21 +15,10 @@ Actual filter operations and export of data to Bluno beetle will be added in the
 #define SensorInputPin3 A2 // input pin number for 3rd EMG
 
 EMGFilters myFilter;
-//discrete filters must work with fixed sample frequency
-// our emg filter only supports "SAMPLE_FREQ_500HZ" or "SAMPLE_FREQ_1000HZ"
-// other sample frequencies will bypass the filter
 
 int sampleRate = SAMPLE_FREQ_1000HZ;
-
 int humFreq = NOTCH_FREQ_50HZ;
-
-//Calibration
-// put on sensors, relax your muscles
-//wait a few seconds, and select the max value as the threshold
-// any value under threshold will be set to 0
-
 static int Threshold = 0;
-
 unsigned long timeStamp;
 unsigned long timeBudget;
 
@@ -38,42 +26,53 @@ const unsigned long RUN_TIME = 30000; //run time in milliseconds (30 seconds)
 unsigned long startTime; // variable to store the start time of the program
 
 
+//For Accelerometer:
+//When using SPI communication, use the following program to construct an object by DFRobot_H3LIS200DL_SPI
+#if defined(ESP32) || defined(ESP8266)
+#define H3LIS200DL_CS  D3
+#elif defined(__AVR__) || defined(ARDUINO_SAM_ZERO)
+#define H3LIS200DL_CS 3
+#elif (defined NRF5)
+#define H3LIS200DL_CS 2  //The pin on the development board with the corresponding silkscreen printed as P2 
+#endif
+
 void setup(){
-    /*add setup code here*/
     myFilter.init(sampleRate, humFreq, true, true, true);
-
-    //open serial
     Serial.begin(9600);
-
-    //record the start time of the program
     startTime = millis();
-
-    //setup for time cost measure
-    //using micros()
     timeBudget = 1e6 / sampleRate;
-    //micros will overflow and auto return to zero every 70 minutes
-   
+
+    acce.setRange(/*Range = */DFRobot_LIS::eH3lis200dl_100g);
+    /**
+    Set data measurement rate：
+      ePowerDown_0HZ = 0,
+      eLowPower_halfHZ,
+      eLowPower_1HZ,
+      eLowPower_2HZ,
+      eLowPower_5HZ,
+      eLowPower_10HZ,
+      eNormal_50HZ,
+      eNormal_100HZ,
+      eNormal_400HZ,
+      eNormal_1000HZ,
+  */
 }
 
-void loop() {
-    /*add main program code here*/
-    //In order to make sure the ADC sample frequency on arduino, 
-    // the time cost should be measured each loop
-    /*------start here------*/
-    
+void loop(){
+    long ax,ay,az;
+    ax = acce.readAccX();//Get the acceleration in the x direction
+    ay = acce.readAccY();//Get the acceleration in the y direction
+    az = acce.readAccZ();//Get the acceleration in the z direction
+
     timeStamp = micros();
-
-    //check if the elapsed time is greater than or equal to the run time
     if (millis() - startTime >= RUN_TIME) {
-      // if the run time has elapsed, stop the program
-      return;
+        return;
     }
-
     int Value1 = analogRead(SensorInputPin1); //unfiltered data for EMG 1
     int Value2 = analogRead(SensorInputPin2); //unfiltered data for EMG 2
     int Value3 = analogRead(SensorInputPin3); //unfiltered data for EMG 3
 
-    //filter processing 
+    //filter processing
     int DataAfterFilter1 = myFilter.update(Value1);
     int DataAfterFilter2 = myFilter.update(Value2);
     int DataAfterFilter3 = myFilter.update(Value3);
@@ -93,9 +92,16 @@ void loop() {
         Serial.print(envelope2);
         Serial.print("\t\t");
         Serial.print(envelope3);
+        Serial.print("\t\t");
+        Serial.print(ax);
+        Serial.print("\t\t");
+        Serial.print(ay);
+        Serial.print("\t\t");
+        Serial.print(az);
         Serial.println();
     }
     delayMicroseconds(500);
+
 }
 
 /* if get EMG signal, return 1*/
@@ -135,17 +141,3 @@ int  getEMGCount(int gforce_envelope)
    }
 }
 
-/*void draw() {
-  if (mySerial.available() > 0 ){
-    String envelope1 = mySerial.readString();
-    if ( envelope1 !=null ) {
-      output.println( envelope1, envelope2, envelope3 );
-    }
-  }
-}
-
-void keyPressed() {
-  output.flush(); //Writes the remaining data to the file
-  output.close(); // Finishes the file
-  exit(); // Stops the program
-}*/
