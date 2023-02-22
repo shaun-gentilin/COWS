@@ -31,6 +31,7 @@ num_data_points = 0
 while(num_data_points < 100):
     data = ser.readline()
     decoded_data = data.decode()
+    print(decoded_data, type(decoded_data))
     file.write(decoded_data)
     num_data_points += 1
 file.close()

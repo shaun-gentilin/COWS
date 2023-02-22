@@ -7,6 +7,13 @@
 #include "EMGFilters.h" 
 #include <DFRobot_LIS.h>
 
+//When using I2C communication, use the following program to construct an object by DFRobot_H3LIS200DL_I2C
+/*!
+ * @brief Constructor 
+ * @param pWire I2c controller
+ * @param addr  I2C address(0x18/0x19)
+ */
+//DFRobot_H3LIS200DL_I2C acce(&Wire,0x18);
 DFRobot_H3LIS200DL_I2C acce;
 
 #define TIMING_DEBUG 1
@@ -25,37 +32,25 @@ unsigned long timeBudget;
 const unsigned long RUN_TIME = 30000; //run time in milliseconds (30 seconds)
 unsigned long startTime; // variable to store the start time of the program
 
-
-//For Accelerometer:
-//When using SPI communication, use the following program to construct an object by DFRobot_H3LIS200DL_SPI
-#if defined(ESP32) || defined(ESP8266)
-#define H3LIS200DL_CS  D3
-#elif defined(__AVR__) || defined(ARDUINO_SAM_ZERO)
-#define H3LIS200DL_CS 3
-#elif (defined NRF5)
-#define H3LIS200DL_CS 2  //The pin on the development board with the corresponding silkscreen printed as P2 
-#endif
-
 void setup(){
     myFilter.init(sampleRate, humFreq, true, true, true);
     Serial.begin(9600);
     startTime = millis();
     timeBudget = 1e6 / sampleRate;
 
+    //Chip initialization for accelerometer
+    while(!acce.begin()){
+      Serial.println("Initialization failed, please check the connection and I2C address settings");
+      delay(1000);
+    }
+    //Get chip id
+    Serial.print("chip id : ");
+    Serial.println(acce.getID(),HEX);
+
     acce.setRange(/*Range = */DFRobot_LIS::eH3lis200dl_100g);
-    /**
-    Set data measurement rate：
-      ePowerDown_0HZ = 0,
-      eLowPower_halfHZ,
-      eLowPower_1HZ,
-      eLowPower_2HZ,
-      eLowPower_5HZ,
-      eLowPower_10HZ,
-      eNormal_50HZ,
-      eNormal_100HZ,
-      eNormal_400HZ,
-      eNormal_1000HZ,
-  */
+
+    acce.setAcquireRate(/*Rate = */DFRobot_LIS::eNormal_50HZ);
+    delay(1000);
 }
 
 void loop(){
