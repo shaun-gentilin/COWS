@@ -61,7 +61,10 @@ void loop(){
 
     timeStamp = micros();
     if (millis() - startTime >= RUN_TIME) {
-        return;
+        //return;
+        /*Having a set run time for data collection on the board requires the board to be plugged into power
+        at a specific time after pairing.  I think it makes more sense to have the board continuously spit data
+        and the app will take its sample when it is ready.*/
     }
     int Value1 = analogRead(SensorInputPin1); //unfiltered data for EMG 1
     int Value2 = analogRead(SensorInputPin2); //unfiltered data for EMG 2

@@ -4,6 +4,7 @@ from serial.tools import list_ports
 
 #figure out which com port the device is associated with
 #by checking available com ports before and after device is plugged in.
+'''
 comport_list_pre_plugin = list(list_ports.comports())
 print("Please plug in device now!")
 cnt = 0
@@ -23,16 +24,21 @@ while True:
         break
     cnt += 1
     sleep(1)
+'''
 
 #print data from com port to a file
-ser = serial.Serial(port=comport_name, baudrate=9600, timeout=30)
+ser = serial.Serial(port='COM5', baudrate=9600, timeout=30)
 file = open(r'C:\Users\Shaun\College\Spring 2023\Capstone\test_data_file.txt', 'w')
 num_data_points = 0
 while(num_data_points < 100):
     data = ser.readline()
     decoded_data = data.decode()
-    print(decoded_data, type(decoded_data))
-    file.write(decoded_data)
+    list_vals = decoded_data.split()
+    if len(list_vals) != 6:
+        continue
+    #print(decoded_data, type(decoded_data))
+    file.write(str(list_vals))
+    file.write('\n')
     num_data_points += 1
 file.close()
 ser.close()
