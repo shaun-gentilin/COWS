@@ -30,14 +30,16 @@ while True:
 ser = serial.Serial(port='COM5', baudrate=9600, timeout=30)
 file = open(r'C:\Users\Shaun\College\Spring 2023\Capstone\test_data_file.txt', 'w')
 num_data_points = 0
-while(num_data_points < 100):
+while(num_data_points < 10000):
     data = ser.readline()
     decoded_data = data.decode()
     list_vals = decoded_data.split()
     if len(list_vals) != 6:
         continue
     #print(decoded_data, type(decoded_data))
-    file.write(str(list_vals))
+    for i in list_vals:
+        file.write(i)
+        file.write('\t')
     file.write('\n')
     num_data_points += 1
 file.close()

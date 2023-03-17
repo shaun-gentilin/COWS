@@ -29,14 +29,9 @@ static int Threshold = 0;
 unsigned long timeStamp;
 unsigned long timeBudget;
 
-const unsigned long RUN_TIME = 30000; //run time in milliseconds (30 seconds)
-unsigned long startTime; // variable to store the start time of the program
-
 void setup(){
     myFilter.init(sampleRate, humFreq, true, true, true);
     Serial.begin(9600);
-    startTime = millis();
-    timeBudget = 1e6 / sampleRate;
 
     //Chip initialization for accelerometer
     while(!acce.begin()){
@@ -59,13 +54,6 @@ void loop(){
     ay = acce.readAccY();//Get the acceleration in the y direction
     az = acce.readAccZ();//Get the acceleration in the z direction
 
-    timeStamp = micros();
-    if (millis() - startTime >= RUN_TIME) {
-        //return;
-        /*Having a set run time for data collection on the board requires the board to be plugged into power
-        at a specific time after pairing.  I think it makes more sense to have the board continuously spit data
-        and the app will take its sample when it is ready.*/
-    }
     int Value1 = analogRead(SensorInputPin1); //unfiltered data for EMG 1
     int Value2 = analogRead(SensorInputPin2); //unfiltered data for EMG 2
     int Value3 = analogRead(SensorInputPin3); //unfiltered data for EMG 3
@@ -83,7 +71,6 @@ void loop(){
     envelope2 = (envelope2 > Threshold) ? envelope2 : 0;
     envelope3 = (envelope3 > Threshold) ? envelope3 : 0;
 
-    timeStamp = micros() - timeStamp;
     if (TIMING_DEBUG) {
         Serial.print(envelope1);
         Serial.print("\t\t");
