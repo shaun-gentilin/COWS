@@ -23,7 +23,7 @@ DFRobot_H3LIS200DL_I2C acce;
 
 EMGFilters myFilter;
 
-int sampleRate = SAMPLE_FREQ_100HZ;
+int sampleRate = 100;
 int humFreq = NOTCH_FREQ_50HZ;
 static int Threshold = 0;
 unsigned long timeStamp;
