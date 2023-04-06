@@ -32,28 +32,10 @@ unsigned long timeBudget;
 void setup(){
     myFilter.init(sampleRate, humFreq, true, true, true);
     Serial.begin(9600);
-
-    //Chip initialization for accelerometer
-    while(!acce.begin()){
-      Serial.println("Initialization failed, please check the connection and I2C address settings");
-      delay(1000);
-    }
-    //Get chip id
-    Serial.print("chip id : ");
-    Serial.println(acce.getID(),HEX);
-
-    acce.setRange(/*Range = */DFRobot_LIS::eH3lis200dl_100g);
-
-    acce.setAcquireRate(/*Rate = */DFRobot_LIS::eNormal_50HZ);
     delay(1000);
 }
 
 void loop(){
-    long ax,ay,az;
-    ax = acce.readAccX();//Get the acceleration in the x direction
-    ay = acce.readAccY();//Get the acceleration in the y direction
-    az = acce.readAccZ();//Get the acceleration in the z direction
-
     int Value1 = analogRead(SensorInputPin1); //unfiltered data for EMG 1
     int Value2 = analogRead(SensorInputPin2); //unfiltered data for EMG 2
     int Value3 = analogRead(SensorInputPin3); //unfiltered data for EMG 3
@@ -77,13 +59,6 @@ void loop(){
         Serial.print(envelope2);
         Serial.print("\t\t");
         Serial.print(envelope3);
-        Serial.print("\t\t");
-        Serial.print(ax);
-        Serial.print("\t\t");
-        Serial.print(ay);
-        Serial.print("\t\t");
-        Serial.print(az);
-        Serial.println();
     }
     delayMicroseconds(500);
 
