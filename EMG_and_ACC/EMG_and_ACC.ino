@@ -59,6 +59,7 @@ void loop(){
         Serial.print(envelope2);
         Serial.print("\t\t");
         Serial.print(envelope3);
+        Serial.println();
     }
     delayMicroseconds(500);
 
